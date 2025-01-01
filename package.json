@@ -16,5 +16,8 @@
     "url": "https://github.com/alexandre-zatti/groceries-monorepo/issues"
   },
   "homepage": "https://github.com/alexandre-zatti/groceries-monorepo#readme",
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  }
 }
