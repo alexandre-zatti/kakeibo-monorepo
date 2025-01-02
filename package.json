@@ -1,22 +1,13 @@
 {
   "name": "groceries-monorepo",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/alexandre-zatti/groceries-monorepo.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/alexandre-zatti/groceries-monorepo/issues"
-  },
-  "homepage": "https://github.com/alexandre-zatti/groceries-monorepo#readme",
   "description": "",
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "ui",
+    "backend",
+    "packages/*"
+  ],
   "devDependencies": {
     "turbo": "^2.3.3"
   }
