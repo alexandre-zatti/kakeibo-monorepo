@@ -1,23 +1,21 @@
 {
-  "name": "@groceries-monorepo/ui",
-  "version": "1.0.0",
-  "main": "index.ts",
+  "name": "ui",
+  "version": "0.1.0",
+  "type": "module",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "lint": "eslint --config ../packages/config/eslint/react-native.config.js"
+    "dev": "next dev --turbopack",
+    "lint": "eslint"
   },
   "dependencies": {
-    "expo": "~52.0.23",
-    "expo-status-bar": "~2.0.0",
-    "react": "18.3.1",
-    "react-native": "0.76.5"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "next": "15.1.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@types/react": "~18.3.12",
-    "typescript": "^5.3.3"
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1"
   }
 }
