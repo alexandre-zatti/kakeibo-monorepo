@@ -14,8 +14,7 @@
     "alwaysStrict": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": false,
-    "outDir": "build"
+    "emitDecoratorMetadata": false
   },
   "include": [
     "**/*"
