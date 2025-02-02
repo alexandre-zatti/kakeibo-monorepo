@@ -31,7 +31,7 @@ const LabelButton = React.forwardRef<
 >(({className, ...props}, ref) => (
   <LabelPrimitive.Root
     ref={ref}
-    className={cn(buttonVariants({variant: 'outline', size: 'lg', className: className}))}
+    className={cn(buttonVariants({size: 'lg', className: className}))}
     {...props}
   />
 ))
