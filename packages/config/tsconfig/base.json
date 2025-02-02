@@ -1,10 +1,10 @@
 {
-  "extends": "@tsconfig/node-lts-strictest/tsconfig.json",
   "compilerOptions": {
     "incremental": true,
     "declaration": true,
     "allowJs": true,
     "noEmit": true,
+    "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
@@ -14,10 +14,13 @@
     "alwaysStrict": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": false,
-    "outDir": "build",
-    "rootDir": "."
+    "emitDecoratorMetadata": false
   },
-  "include": ["**/*"],
-  "exclude": ["node_modules", "build"]
+  "include": [
+    "**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
 }
