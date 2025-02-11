@@ -1,19 +1,24 @@
-import tsPlugin from "@typescript-eslint/eslint-plugin";
-import importPlugin from "eslint-plugin-import"
-import tsParser from "@typescript-eslint/parser";
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import prettierPlugin from 'eslint-plugin-prettier';
+import prettierConfig from 'eslint-config-prettier';
 
-export default {
-    files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
-    languageOptions: {
-        parser: tsParser
+export default [
+    eslint.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked, // This needs spread because different export style
+    {
+        plugins: {
+            prettier: prettierPlugin,
+        },
+        rules: {
+            ...prettierConfig.rules,
+            'prettier/prettier': 'error',
+        },
+        languageOptions: {
+            sourceType: 'module',
+            parserOptions: {
+                project: true,
+            },
+        },
     },
-    plugins: {
-        "@typescript-eslint": tsPlugin,
-        "import": importPlugin
-    },
-    rules: {
-        ...tsPlugin.configs.recommended.rules,
-        ...importPlugin.configs.recommended.rules
-    },
-}
-
+];

@@ -1,10 +1,8 @@
-import nextEslintConfig from '../packages/config/eslint/next.config.js'
+import nextEslintConfig from "@groceries-monorepo/config/eslint/next.config.js";
 
-export default {
+export default [
     ...nextEslintConfig,
-    settings: {
-        'import/resolver': {
-            typescript: {}
-        }
+    {
+        ignores: ["eslint.config.js"],
     }
-}
+]
