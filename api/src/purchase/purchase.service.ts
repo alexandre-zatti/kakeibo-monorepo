@@ -12,7 +12,9 @@ export class PurchaseService {
     return { test: 'Hello World!' };
   }
 
-  private async processReceiptFile(file: Buffer): Promise<AxiosResponse<any>> {
+  private async processReceiptFile(
+    file: Buffer,
+  ): Promise<AxiosResponse<unknown>> {
     const formData = new FormData();
     formData.append('file', new Blob([file]));
 
@@ -23,7 +25,7 @@ export class PurchaseService {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            'X-API-KEY': '@Alexandre12',
+            'X-API-KEY': '',
           },
         },
       ),
