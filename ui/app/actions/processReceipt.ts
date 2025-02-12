@@ -8,7 +8,7 @@ export default async function processReceipt(formData: FormData) {
         method: 'POST',
         body: formData,
         headers: {
-          'X-API-KEY': '', //TODO Add this to .env file
+          'X-API-KEY': '',
         },
       },
     );
