@@ -1,0 +1,10 @@
+{
+  "extends": "@groceries-monorepo/config/tsconfig/node.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "."
+  },
+  "include": [
+    "**/*.ts"
+  ]
+}
