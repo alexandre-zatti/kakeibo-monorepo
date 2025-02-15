@@ -13,7 +13,9 @@ export class PurchaseController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))
-  createPurchase(@UploadedFile() file: Express.Multer.File): object {
-    return this.purchaseService.createPurchase(file);
+  async createPurchase(
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<object | undefined> {
+    return await this.purchaseService.processAndSavePurchase(file);
   }
 }

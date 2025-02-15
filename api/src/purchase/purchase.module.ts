@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PurchaseController } from './purchase.controller';
 import { PurchaseService } from './purchase.service';
-import { HttpModule } from '@nestjs/axios';
+import { PurchaseController } from './purchase.controller';
 
 @Module({
-  imports: [HttpModule],
+  imports: [],
   controllers: [PurchaseController],
   providers: [PurchaseService],
 })
