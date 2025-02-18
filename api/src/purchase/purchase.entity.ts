@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Auditable } from '../auditable.entity';
+import { Product } from '../product/product.entity';
 
 @Entity()
 export class Purchase extends Auditable {
@@ -14,4 +15,7 @@ export class Purchase extends Auditable {
 
   @Column({ type: 'datetime', name: 'bought_at' })
   boughtAt: Date;
+
+  @OneToMany(() => Product, (product) => product.purchase, { cascade: true })
+  products: Product[];
 }
