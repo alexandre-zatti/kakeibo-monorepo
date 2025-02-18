@@ -1,7 +1,8 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Auditable } from '../auditable.entity';
 
 @Entity()
-export class Purchase {
+export class Purchase extends Auditable {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
@@ -13,18 +14,4 @@ export class Purchase {
 
   @Column({ type: 'datetime', name: 'bought_at' })
   boughtAt: Date;
-
-  @Column({
-    type: 'datetime',
-    default: () => 'CURRENT_TIMESTAMP',
-    name: 'created_at',
-  })
-  createdAt: Date;
-
-  @Column({
-    type: 'datetime',
-    default: () => 'CURRENT_TIMESTAMP',
-    name: 'updated_at',
-  })
-  updatedAt: Date;
 }
