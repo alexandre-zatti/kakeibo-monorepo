@@ -13,12 +13,20 @@ import {
   ReceiptItemsArray,
   validateReceiptFields,
 } from './types/documentReceipt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Purchase } from './purchase.entity';
+import { Repository } from 'typeorm';
+import { Product } from '../product/product.entity';
 
 @Injectable()
 export class PurchaseService {
   private readonly client: DocumentIntelligenceClient;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    @InjectRepository(Purchase)
+    private readonly purchaseRepository: Repository<Purchase>,
+    private readonly configService: ConfigService,
+  ) {
     const diEndpoint = this.configService.get<string>('DI_ENDPOINT');
     const diKey = this.configService.get<string>('DI_KEY');
 
@@ -31,10 +39,11 @@ export class PurchaseService {
 
   async processAndSavePurchase(
     receiptFile: Express.Multer.File,
-  ): Promise<ReceiptItemsArray | undefined> {
+  ): Promise<Purchase | undefined> {
     try {
       const receiptDocument = await this.analyzeReceiptDocument(receiptFile);
-      return this.getReceiptItemsFromDocument(receiptDocument);
+      const receiptItems = this.getReceiptItemsFromDocument(receiptDocument);
+      return await this.savePurchase(receiptItems);
     } catch (error) {
       console.log(error);
     }
@@ -81,5 +90,32 @@ export class PurchaseService {
     receiptDocument: AnalyzedDocumentOutput,
   ): ReceiptItemsArray {
     return validateReceiptFields(receiptDocument.fields).Items;
+  }
+
+  private async savePurchase(
+    receiptItems: ReceiptItemsArray,
+  ): Promise<Purchase> {
+    const purchase = new Purchase();
+    purchase.status = 1;
+    purchase.totalValue = 123.23;
+    purchase.boughtAt = new Date();
+
+    const product = new Product();
+    product.code =
+      receiptItems.valueArray[0].valueObject.ProductCode.valueString;
+    product.description =
+      receiptItems.valueArray[0].valueObject.Description.valueString;
+    product.unitValue =
+      receiptItems.valueArray[0].valueObject.Price.valueCurrency.amount;
+    product.unitIdentifier = 1;
+    product.quantity =
+      receiptItems.valueArray[0].valueObject.Quantity.valueNumber;
+    product.totalValue =
+      receiptItems.valueArray[0].valueObject.TotalPrice.valueCurrency.amount;
+    product.purchase = purchase;
+
+    purchase.products = [product];
+
+    return this.purchaseRepository.save(purchase);
   }
 }

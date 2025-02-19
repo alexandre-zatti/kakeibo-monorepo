@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Auditable } from '../auditable.entity';
+import { Auditable } from '../auditable';
 import { Purchase } from '../purchase/purchase.entity';
 
 @Entity()

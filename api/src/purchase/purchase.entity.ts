@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Auditable } from '../auditable.entity';
+import { Auditable } from '../auditable';
 import { Product } from '../product/product.entity';
 
 @Entity()
