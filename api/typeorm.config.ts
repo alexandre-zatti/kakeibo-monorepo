@@ -5,5 +5,5 @@ export default new DataSource({
   database: './db/database.sqlite',
   synchronize: false,
   entities: ['./dist/**/*.entity.js'],
-  migrations: ['./db/migrations/**'],
+  migrations: ['./dist/db/migrations/*.js'],
 });

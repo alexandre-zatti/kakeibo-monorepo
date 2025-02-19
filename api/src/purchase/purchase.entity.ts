@@ -1,9 +1,9 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Auditable } from '../auditable';
+import { AuditableEntity } from '../shared/entities/auditable.entity';
 import { Product } from '../product/product.entity';
 
 @Entity()
-export class Purchase extends Auditable {
+export class Purchase extends AuditableEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 

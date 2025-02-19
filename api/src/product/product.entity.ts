@@ -5,11 +5,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Auditable } from '../auditable';
+import { AuditableEntity } from '../shared/entities/auditable.entity';
 import { Purchase } from '../purchase/purchase.entity';
 
 @Entity()
-export class Product extends Auditable {
+export class Product extends AuditableEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
@@ -26,8 +26,8 @@ export class Product extends Auditable {
   @Column({ type: 'decimal', precision: 10, scale: 2, name: 'unit_value' })
   unitValue: number;
 
-  @Column({ type: 'int', name: 'unit_identifier' })
-  unitIdentifier: number;
+  @Column({ type: 'varchar', length: 10, name: 'unit_identifier' })
+  unitIdentifier: string;
 
   @Column({ type: 'int', name: 'quantity' })
   quantity: number;

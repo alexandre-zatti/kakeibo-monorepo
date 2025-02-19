@@ -1,7 +1,9 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class ProductCreate1739841897215 implements MigrationInterface {
-  name = 'ProductCreate1739841897215';
+export class CreatePurchaseAndProductTable1739974217979
+  implements MigrationInterface
+{
+  name = 'CreatePurchaseAndProductTable1739974217979';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`CREATE TABLE "product"
@@ -12,10 +14,19 @@ export class ProductCreate1739841897215 implements MigrationInterface {
                                  "code"            varchar(255)   NOT NULL,
                                  "description"     varchar(255)   NOT NULL,
                                  "unit_value"      decimal(10, 2) NOT NULL,
-                                 "unit_identifier" integer        NOT NULL,
+                                 "unit_identifier" varchar(10)    NOT NULL,
                                  "quantity"        integer        NOT NULL,
                                  "total_value"     decimal(10, 2) NOT NULL,
                                  "purchase_id"     integer
+                             )`);
+    await queryRunner.query(`CREATE TABLE "purchase"
+                             (
+                                 "created_at"  datetime       NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+                                 "updated_at"  datetime       NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+                                 "id"          integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+                                 "status"      integer        NOT NULL,
+                                 "total_value" decimal(10, 2) NOT NULL,
+                                 "bought_at"   datetime       NOT NULL
                              )`);
     await queryRunner.query(`CREATE TABLE "temporary_product"
                              (
@@ -25,7 +36,7 @@ export class ProductCreate1739841897215 implements MigrationInterface {
                                  "code"            varchar(255)   NOT NULL,
                                  "description"     varchar(255)   NOT NULL,
                                  "unit_value"      decimal(10, 2) NOT NULL,
-                                 "unit_identifier" integer        NOT NULL,
+                                 "unit_identifier" varchar(10)    NOT NULL,
                                  "quantity"        integer        NOT NULL,
                                  "total_value"     decimal(10, 2) NOT NULL,
                                  "purchase_id"     integer,
@@ -69,7 +80,7 @@ export class ProductCreate1739841897215 implements MigrationInterface {
                                  "code"            varchar(255)   NOT NULL,
                                  "description"     varchar(255)   NOT NULL,
                                  "unit_value"      decimal(10, 2) NOT NULL,
-                                 "unit_identifier" integer        NOT NULL,
+                                 "unit_identifier" varchar(10)    NOT NULL,
                                  "quantity"        integer        NOT NULL,
                                  "total_value"     decimal(10, 2) NOT NULL,
                                  "purchase_id"     integer
@@ -92,6 +103,7 @@ export class ProductCreate1739841897215 implements MigrationInterface {
                                     "purchase_id"
                              FROM "temporary_product"`);
     await queryRunner.query(`DROP TABLE "temporary_product"`);
+    await queryRunner.query(`DROP TABLE "purchase"`);
     await queryRunner.query(`DROP TABLE "product"`);
   }
 }

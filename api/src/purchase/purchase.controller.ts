@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PurchaseService } from './purchase.service';
-import { Purchase } from './purchase.entity';
+import { PurchaseDto } from './dtos/purchase.dto';
 
 @Controller()
 export class PurchaseController {
@@ -16,7 +16,7 @@ export class PurchaseController {
   @UseInterceptors(FileInterceptor('file'))
   async createPurchase(
     @UploadedFile() file: Express.Multer.File,
-  ): Promise<Purchase | undefined> {
+  ): Promise<PurchaseDto | undefined> {
     return await this.purchaseService.processAndSavePurchase(file);
   }
 }

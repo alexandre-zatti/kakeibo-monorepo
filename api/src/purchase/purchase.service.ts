@@ -17,6 +17,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Purchase } from './purchase.entity';
 import { Repository } from 'typeorm';
 import { Product } from '../product/product.entity';
+import { PurchaseDto } from './dtos/purchase.dto';
 
 @Injectable()
 export class PurchaseService {
@@ -39,7 +40,7 @@ export class PurchaseService {
 
   async processAndSavePurchase(
     receiptFile: Express.Multer.File,
-  ): Promise<Purchase | undefined> {
+  ): Promise<PurchaseDto | undefined> {
     try {
       const receiptDocument = await this.analyzeReceiptDocument(receiptFile);
       const receiptItems = this.getReceiptItemsFromDocument(receiptDocument);
@@ -94,7 +95,7 @@ export class PurchaseService {
 
   private async savePurchase(
     receiptItems: ReceiptItemsArray,
-  ): Promise<Purchase> {
+  ): Promise<PurchaseDto> {
     const purchase = new Purchase();
     purchase.status = 1;
     purchase.totalValue = 123.23;
@@ -107,7 +108,8 @@ export class PurchaseService {
       receiptItems.valueArray[0].valueObject.Description.valueString;
     product.unitValue =
       receiptItems.valueArray[0].valueObject.Price.valueCurrency.amount;
-    product.unitIdentifier = 1;
+    product.unitIdentifier =
+      receiptItems.valueArray[0].valueObject.QuantityUnit.valueString;
     product.quantity =
       receiptItems.valueArray[0].valueObject.Quantity.valueNumber;
     product.totalValue =
@@ -116,6 +118,6 @@ export class PurchaseService {
 
     purchase.products = [product];
 
-    return this.purchaseRepository.save(purchase);
+    return PurchaseDto.fromEntity(await this.purchaseRepository.save(purchase));
   }
 }

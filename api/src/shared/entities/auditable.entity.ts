@@ -1,6 +1,6 @@
 import { Column } from 'typeorm';
 
-export abstract class Auditable {
+export abstract class AuditableEntity {
   @Column({
     type: 'datetime',
     default: () => 'CURRENT_TIMESTAMP',
