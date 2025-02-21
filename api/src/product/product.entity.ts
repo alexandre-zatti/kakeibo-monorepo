@@ -17,21 +17,38 @@ export class Product extends AuditableEntity {
   @JoinColumn({ name: 'purchase_id' })
   purchase: Purchase;
 
-  @Column({ type: 'varchar', length: 255, name: 'code' })
-  code: string;
+  @Column({ type: 'varchar', length: 255, name: 'code', nullable: true })
+  code?: string;
 
-  @Column({ type: 'varchar', length: 255, name: 'description' })
-  description: string;
+  @Column({ type: 'varchar', length: 255, name: 'description', nullable: true })
+  description?: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'unit_value' })
-  unitValue: number;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    name: 'unit_value',
+    nullable: true,
+  })
+  unitValue?: number;
 
-  @Column({ type: 'varchar', length: 10, name: 'unit_identifier' })
-  unitIdentifier: string;
+  @Column({
+    type: 'varchar',
+    length: 10,
+    name: 'unit_identifier',
+    nullable: true,
+  })
+  unitIdentifier?: string;
 
-  @Column({ type: 'int', name: 'quantity' })
-  quantity: number;
+  @Column({ type: 'int', name: 'quantity', nullable: true })
+  quantity?: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, name: 'total_value' })
-  totalValue: number;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    name: 'total_value',
+    nullable: true,
+  })
+  totalValue?: number;
 }

@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AzureKeyCredential } from '@azure/core-auth';
+
 import createClient, {
   AnalyzedDocumentOutput,
   AnalyzeOperationOutput,
@@ -13,19 +14,21 @@ import {
   ReceiptItemsArray,
   validateReceiptFields,
 } from './types/documentReceipt';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { Purchase } from './purchase.entity';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Product } from '../product/product.entity';
 import { PurchaseDto } from './dtos/purchase.dto';
+import { CreatePurchaseDto } from './dtos/create-purchase.dto';
+import { PurchaseStatus } from './enums/status.enum';
 
 @Injectable()
 export class PurchaseService {
   private readonly client: DocumentIntelligenceClient;
 
   constructor(
-    @InjectRepository(Purchase)
-    private readonly purchaseRepository: Repository<Purchase>,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
     private readonly configService: ConfigService,
   ) {
     const diEndpoint = this.configService.get<string>('DI_ENDPOINT');
@@ -39,12 +42,14 @@ export class PurchaseService {
   }
 
   async processAndSavePurchase(
-    receiptFile: Express.Multer.File,
+    createPurchaseDto: CreatePurchaseDto,
   ): Promise<PurchaseDto | undefined> {
     try {
-      const receiptDocument = await this.analyzeReceiptDocument(receiptFile);
+      const receiptDocument = await this.analyzeReceiptDocument(
+        createPurchaseDto.file,
+      );
       const receiptItems = this.getReceiptItemsFromDocument(receiptDocument);
-      return await this.savePurchase(receiptItems);
+      return await this.savePurchase(createPurchaseDto.date, receiptItems);
     } catch (error) {
       console.log(error);
     }
@@ -94,30 +99,56 @@ export class PurchaseService {
   }
 
   private async savePurchase(
+    purchaseDate: string,
     receiptItems: ReceiptItemsArray,
   ): Promise<PurchaseDto> {
-    const purchase = new Purchase();
-    purchase.status = 1;
-    purchase.totalValue = 123.23;
-    purchase.boughtAt = new Date();
+    try {
+      return await this.dataSource.transaction(
+        async (transactionalEntityManager) => {
+          const purchase = new Purchase();
+          const products = this.createProductsFromReceiptItems(
+            purchase,
+            receiptItems,
+          );
 
-    const product = new Product();
-    product.code =
-      receiptItems.valueArray[0].valueObject.ProductCode.valueString;
-    product.description =
-      receiptItems.valueArray[0].valueObject.Description.valueString;
-    product.unitValue =
-      receiptItems.valueArray[0].valueObject.Price.valueCurrency.amount;
-    product.unitIdentifier =
-      receiptItems.valueArray[0].valueObject.QuantityUnit.valueString;
-    product.quantity =
-      receiptItems.valueArray[0].valueObject.Quantity.valueNumber;
-    product.totalValue =
-      receiptItems.valueArray[0].valueObject.TotalPrice.valueCurrency.amount;
-    product.purchase = purchase;
+          purchase.products = products;
+          purchase.totalValue = this.calculatePurchaseTotalValue(products);
+          purchase.status = PurchaseStatus.PENDING_REVIEW;
+          purchase.boughtAt = new Date(purchaseDate);
 
-    purchase.products = [product];
+          return PurchaseDto.fromEntity(
+            await transactionalEntityManager.save(purchase),
+          );
+        },
+      );
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      throw new Error('Failed to save purchase');
+    }
+  }
 
-    return PurchaseDto.fromEntity(await this.purchaseRepository.save(purchase));
+  private createProductsFromReceiptItems(
+    purchase: Purchase,
+    receiptItems: ReceiptItemsArray,
+  ): Product[] {
+    return receiptItems.valueArray.map((item) => {
+      const receiptItem = item.valueObject;
+      const product = new Product();
+      product.code = receiptItem.ProductCode?.valueString;
+      product.description = receiptItem.Description?.valueString;
+      product.unitValue = receiptItem.Price?.valueCurrency.amount;
+      product.unitIdentifier = receiptItem.QuantityUnit?.valueString;
+      product.quantity = receiptItem.Quantity?.valueNumber;
+      product.totalValue = receiptItem.TotalPrice?.valueCurrency.amount;
+      product.purchase = purchase;
+      return product;
+    });
+  }
+
+  private calculatePurchaseTotalValue(products: Product[]): number {
+    return products.reduce(
+      (prev, curr) => prev + (curr.totalValue ? curr.totalValue : 0),
+      0,
+    );
   }
 }

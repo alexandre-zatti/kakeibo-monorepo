@@ -17,12 +17,12 @@ const NumberSchema = z.object({
 
 const ReceiptItemSchema = z.object({
   valueObject: z.object({
-    Description: StringSchema,
-    Price: CurrencySchema,
-    ProductCode: StringSchema,
-    Quantity: NumberSchema,
-    QuantityUnit: StringSchema,
-    TotalPrice: CurrencySchema,
+    Description: StringSchema.optional(),
+    Price: CurrencySchema.optional(),
+    ProductCode: StringSchema.optional(),
+    Quantity: NumberSchema.optional(),
+    QuantityUnit: StringSchema.optional(),
+    TotalPrice: CurrencySchema.optional(),
   }),
 });
 
@@ -34,7 +34,6 @@ const ReceiptFieldsSchema = z.object({
   Items: ReceiptItemArraySchema,
 });
 
-export type ReceiptItem = z.infer<typeof ReceiptItemSchema>;
 export type ReceiptItemsArray = z.infer<typeof ReceiptItemArraySchema>;
 export type ReceiptFields = z.infer<typeof ReceiptFieldsSchema>;
 
