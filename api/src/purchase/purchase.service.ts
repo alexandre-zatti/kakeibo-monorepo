@@ -1,4 +1,10 @@
-import { HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AzureKeyCredential } from '@azure/core-auth';
 
@@ -35,7 +41,9 @@ export class PurchaseService {
     const diKey = this.configService.get<string>('DI_KEY');
 
     if (!diEndpoint || !diKey) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        'Credentials for connecting to Azure DI are invalid!',
+      );
     }
 
     this.client = createClient(diEndpoint, new AzureKeyCredential(diKey));
@@ -51,7 +59,7 @@ export class PurchaseService {
       const receiptItems = this.getReceiptItemsFromDocument(receiptDocument);
       return await this.savePurchase(createPurchaseDto.date, receiptItems);
     } catch (error) {
-      console.log(error);
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -68,7 +76,9 @@ export class PurchaseService {
       });
 
     if (isUnexpected(initialResponse)) {
-      throw new Error(initialResponse.body.error.message);
+      throw new UnprocessableEntityException(
+        initialResponse.body.error.message,
+      );
     }
 
     const poller = getLongRunningPoller(this.client, initialResponse);
@@ -77,7 +87,7 @@ export class PurchaseService {
     if (analyzeResult.status !== HttpStatus.OK.toString()) {
       const errorResponseOutput =
         analyzeResult.body as DocumentIntelligenceErrorResponseOutput;
-      throw new Error(errorResponseOutput.error.message);
+      throw new UnprocessableEntityException(errorResponseOutput.error.message);
     }
 
     const analyzeResultBody = analyzeResult.body as AnalyzeOperationOutput;
@@ -86,7 +96,9 @@ export class PurchaseService {
     const document = documents?.[0];
 
     if (!document) {
-      throw new Error('Expected at least one document in the result.');
+      throw new UnprocessableEntityException(
+        'Expected at least one document in the result.',
+      );
     }
 
     return document;
@@ -122,8 +134,7 @@ export class PurchaseService {
         },
       );
     } catch (error) {
-      console.error('Transaction failed:', error);
-      throw new Error('Failed to save purchase');
+      throw new InternalServerErrorException(error);
     }
   }
 

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Post,
@@ -38,12 +39,20 @@ export class PurchaseController {
   })
   @ApiResponse({
     status: 201,
-    description: 'File and date successfully processed',
+    description: 'Purchase successfully processed',
     type: PurchaseDto,
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request - Receipt or date is missing or invalid',
+    description: 'Receipt or Date is missing or invalid',
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Receipt is invalid',
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Internal Server Error',
   })
   @UseInterceptors(FileInterceptor('file'))
   async createPurchase(
@@ -51,11 +60,10 @@ export class PurchaseController {
     @Body() body: CreatePurchaseDto,
   ): Promise<PurchaseDto | undefined> {
     if (!file) {
-      throw new Error('Receipt file is required');
+      throw new BadRequestException('Receipt file is required');
     }
 
     const dto: CreatePurchaseDto = { ...body, file };
-
     return await this.purchaseService.processAndSavePurchase(dto);
   }
 }
