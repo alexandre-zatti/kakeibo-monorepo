@@ -11,4 +11,9 @@ export class CreatePurchaseDto {
   date: string;
 
   file: Express.Multer.File;
+
+  constructor(date: string, file: Express.Multer.File) {
+    this.file = file;
+    this.date = date;
+  }
 }
