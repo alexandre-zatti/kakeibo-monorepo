@@ -5,9 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Purchase } from './entities/purchase.entity';
 import { ProductService } from './services/product.service';
 import { DocumentInteligenceModule } from '../document-inteligence/document-inteligence.module';
+import { Product } from './entities/product.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Purchase]), DocumentInteligenceModule],
+  imports: [
+    TypeOrmModule.forFeature([Purchase, Product]),
+    DocumentInteligenceModule,
+  ],
   controllers: [PurchaseController],
   providers: [PurchaseService, ProductService],
 })
