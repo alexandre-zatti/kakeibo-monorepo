@@ -3,7 +3,7 @@ name: Run Tests
 on:
   pull_request:
     branches:
-      - main
+      - main # Run on PRs targeting the main branch
 
 jobs:
   test:
@@ -15,17 +15,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'pnpm'
+          node-version: 20 # Use the Node.js version your project requires
+          cache: 'pnpm' # Enable caching for pnpm
 
       - name: Install pnpm
-        run: npm install -g pnpm@latest
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest # Install the latest version of pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install # Install dependencies using pnpm
 
       - name: Run unit tests
-        run: pnpm turbo run test
+        run: pnpm turbo run test # Run unit tests using turbo
 
       - name: Run end-to-end tests
-        run: pnpm turbo run test:e2e
+        run: pnpm turbo run test:e2e # Run end-to-end tests using turbo
