@@ -1,1 +1,1 @@
-![Tests](https://github.com/alexandre-zatti/groceries-monorepo/actions/workflows/tests.yaml/badge.svg)
+![Tests](https://github.com/alexandre-zatti/groceries-monorepo/actions/workflows/test.yaml/badge.svg)
