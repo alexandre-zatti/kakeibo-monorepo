@@ -7,7 +7,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PurchaseService } from './purchase.service';
+import { PurchaseService } from './services/purchase.service';
 import { CreatePurchaseDto } from './dtos/create-purchase.dto';
 import { PurchaseDto } from './dtos/purchase.dto';
 import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
@@ -58,7 +58,7 @@ export class PurchaseController {
   async createPurchase(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreatePurchaseDto,
-  ): Promise<PurchaseDto | undefined> {
+  ): Promise<PurchaseDto> {
     if (!file) {
       throw new BadRequestException('Receipt file is required');
     }

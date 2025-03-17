@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ProductDto } from '../../product/dtos/product.dto';
-import { Purchase } from '../purchase.entity';
+import { ProductDto } from './product.dto';
+import { Purchase } from '../entities/purchase.entity';
 
 export class PurchaseDto {
   @ApiProperty({

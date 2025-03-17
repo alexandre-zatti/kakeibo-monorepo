@@ -5,8 +5,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { AuditableEntity } from '../shared/entities/auditable.entity';
-import { Purchase } from '../purchase/purchase.entity';
+import { AuditableEntity } from '../../shared/entities/auditable.entity';
+import { Purchase } from './purchase.entity';
 
 @Entity()
 export class Product extends AuditableEntity {

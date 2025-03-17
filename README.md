@@ -1,0 +1,1 @@
+![Tests](https://github.com/alexandre-zatti/groceries-monorepo/actions/workflows/tests.yml/badge.svg)

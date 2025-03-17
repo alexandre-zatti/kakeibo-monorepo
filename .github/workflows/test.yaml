@@ -1,0 +1,26 @@
+name: Run Tests
+on:
+  pull_request:
+    branches:
+      - main # Run on PRs targeting the main branch
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # Use the Node.js version your project requires
+          cache: 'npm' # Enable caching for npm
+
+      - name: Install dependencies
+        run: npm ci # Clean install dependencies using npm
+
+      - name: Run unit tests
+        run: npx turbo run test # Run unit tests using turbo through npx
+
+      - name: Run end-to-end tests
+        run: npx turbo run test:e2e # Run end-to-end tests using turbo through npx

@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
-import { PurchaseService } from './purchase.service';
+import { PurchaseService } from './services/purchase.service';
 import { PurchaseController } from './purchase.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Purchase } from './purchase.entity';
-import { ProductModule } from '../product/product.module';
+import { Purchase } from './entities/purchase.entity';
+import { ProductService } from './services/product.service';
+import { DocumentInteligenceModule } from '../document-inteligence/document-inteligence.module';
+import { Product } from './entities/product.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Purchase]), ProductModule],
+  imports: [
+    TypeOrmModule.forFeature([Purchase, Product]),
+    DocumentInteligenceModule,
+  ],
   controllers: [PurchaseController],
-  providers: [PurchaseService],
+  providers: [PurchaseService, ProductService],
 })
 export class PurchaseModule {}
