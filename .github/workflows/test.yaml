@@ -1,10 +1,8 @@
 name: Run Tests
-
 on:
   pull_request:
     branches:
       - main # Run on PRs targeting the main branch
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -12,16 +10,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest # Install the latest version of pnpm
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20 # Use the Node.js version your project requires
           cache: 'pnpm' # Enable caching for pnpm
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest # Install the latest version of pnpm
 
       - name: Install dependencies
         run: pnpm install # Install dependencies using pnpm
