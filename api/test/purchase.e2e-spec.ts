@@ -11,6 +11,7 @@ import { DocumentInteligenceModule } from '../src/document-inteligence/document-
 import { Product } from '../src/purchase/entities/product.entity';
 import { PurchaseStatus } from '../src/purchase/enums/status.enum';
 import { PurchaseDto } from '../src/purchase/dtos/purchase.dto';
+import { UpdatePurchaseDto } from '../src/purchase/dtos/update-purchase.dto';
 
 describe('PurchaseController (e2e)', () => {
   let app: INestApplication<App>;
@@ -24,7 +25,6 @@ describe('PurchaseController (e2e)', () => {
           dropSchema: true,
           entities: [Purchase, Product],
           synchronize: true,
-          logging: true,
         }),
         TypeOrmModule.forFeature([Purchase, Product]),
         PurchaseModule,
@@ -47,7 +47,7 @@ describe('PurchaseController (e2e)', () => {
     await app.close();
   });
 
-  it('should create a new purchase (POST /purchase)', async () => {
+  it('should create a new purchase', async () => {
     const mockFile = Buffer.from('mock file content');
     const mockDate = '2024-02-20';
 
@@ -87,5 +87,33 @@ describe('PurchaseController (e2e)', () => {
       expect(product).toHaveProperty('quantity');
       expect(product).toHaveProperty('totalValue');
     });
+  });
+
+  it('should update a purchase', async () => {
+    const mockFile = Buffer.from('mock file content');
+    const mockDate = '2024-02-20';
+
+    const responseCreate = await request(app.getHttpServer())
+      .post('/purchase')
+      .field('date', mockDate)
+      .attach('file', mockFile, 'receipt.jpg')
+      .expect(201);
+
+    const createPurchaseResponseBody = responseCreate.body as PurchaseDto;
+
+    const responseUpdate = await request(app.getHttpServer())
+      .put(`/purchase/${createPurchaseResponseBody.id}`)
+      .send({
+        ...createPurchaseResponseBody,
+        status: PurchaseStatus.REVIEWED,
+      } as UpdatePurchaseDto)
+      .expect(200);
+
+    const updatePurchaseResponseBody = responseUpdate.body as UpdatePurchaseDto;
+
+    expect(updatePurchaseResponseBody).toHaveProperty(
+      'status',
+      PurchaseStatus.REVIEWED,
+    );
   });
 });

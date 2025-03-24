@@ -2,7 +2,9 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Param,
   Post,
+  Put,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -10,50 +12,18 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PurchaseService } from './services/purchase.service';
 import { CreatePurchaseDto } from './dtos/create-purchase.dto';
 import { PurchaseDto } from './dtos/purchase.dto';
-import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiCreatePurchaseDocs,
+  ApiUpdatePurchaseDocs,
+} from './purchase-swagger.decorator';
+import { UpdatePurchaseDto } from './dtos/update-purchase.dto';
 
 @Controller({ path: '/purchase', version: '1' })
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 
   @Post()
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Receipt file and date of purchase',
-    schema: {
-      type: 'object',
-      required: ['file', 'date'],
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'The receipt file to upload',
-        },
-        date: {
-          type: 'string',
-          example: '2024-02-20',
-          description: 'Purchase date in ISO format (YYYY-MM-DD)',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Purchase successfully processed',
-    type: PurchaseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Receipt or Date is missing or invalid',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Receipt is invalid',
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal Server Error',
-  })
+  @ApiCreatePurchaseDocs()
   @UseInterceptors(FileInterceptor('file'))
   async createPurchase(
     @UploadedFile() file: Express.Multer.File,
@@ -64,6 +34,15 @@ export class PurchaseController {
     }
 
     const dto: CreatePurchaseDto = { ...body, file };
-    return await this.purchaseService.processAndSavePurchase(dto);
+    return await this.purchaseService.processReceiptAndCreatePurchase(dto);
+  }
+
+  @Put(':purchaseId')
+  @ApiUpdatePurchaseDocs()
+  async updatePurchase(
+    @Param('purchaseId') purchaseId: number,
+    @Body() body: UpdatePurchaseDto,
+  ): Promise<UpdatePurchaseDto> {
+    return await this.purchaseService.updatePurchase(purchaseId, body);
   }
 }

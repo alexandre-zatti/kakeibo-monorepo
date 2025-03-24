@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ReceiptItemsArray } from '../../shared/types/documentReceipt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Purchase } from '../entities/purchase.entity';
@@ -9,6 +13,7 @@ import { CreatePurchaseDto } from '../dtos/create-purchase.dto';
 import { PurchaseStatus } from '../enums/status.enum';
 import { DocumentInteligenceService } from '../../document-inteligence/document-inteligence.service';
 import { ProductService } from './product.service';
+import { UpdatePurchaseDto } from '../dtos/update-purchase.dto';
 
 @Injectable()
 export class PurchaseService {
@@ -19,7 +24,7 @@ export class PurchaseService {
     private readonly productService: ProductService,
   ) {}
 
-  async processAndSavePurchase(
+  async processReceiptAndCreatePurchase(
     createPurchaseDto: CreatePurchaseDto,
   ): Promise<PurchaseDto> {
     try {
@@ -27,38 +32,58 @@ export class PurchaseService {
         await this.documentInteligenceService.extractItemsFromReceiptDocument(
           createPurchaseDto.file,
         );
-      return await this.savePurchase(createPurchaseDto.date, receiptItems);
+      return await this.savePurchaseWithProducts(
+        createPurchaseDto.date,
+        receiptItems,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  private async savePurchase(
+  async updatePurchase(
+    purchaseId: number,
+    updatePurchaseDto: UpdatePurchaseDto,
+  ): Promise<UpdatePurchaseDto> {
+    const purchaseRepository = this.dataSource.getRepository(Purchase);
+    const existingPurchase = await purchaseRepository.findOne({
+      where: { id: purchaseId },
+    });
+
+    if (!existingPurchase) {
+      throw new NotFoundException(`Purchase with ID ${purchaseId} not found`);
+    }
+
+    const updatedPurchase = purchaseRepository.merge(
+      existingPurchase,
+      updatePurchaseDto,
+    );
+
+    return purchaseRepository.save(updatedPurchase);
+  }
+
+  private async savePurchaseWithProducts(
     purchaseDate: string,
     receiptItems: ReceiptItemsArray,
   ): Promise<PurchaseDto> {
-    try {
-      return await this.dataSource.transaction(
-        async (transactionalEntityManager) => {
-          const purchase = new Purchase();
-          const products = this.productService.createProductsFromReceiptItems(
-            purchase,
-            receiptItems,
-          );
+    return await this.dataSource.transaction(
+      async (transactionalEntityManager) => {
+        const purchase = new Purchase();
+        const products = this.productService.createProductsFromReceiptItems(
+          purchase,
+          receiptItems,
+        );
 
-          purchase.products = products;
-          purchase.totalValue = this.calculatePurchaseTotalValue(products);
-          purchase.status = PurchaseStatus.PENDING_REVIEW;
-          purchase.boughtAt = new Date(purchaseDate);
+        purchase.products = products;
+        purchase.totalValue = this.calculatePurchaseTotalValue(products);
+        purchase.status = PurchaseStatus.PENDING_REVIEW;
+        purchase.boughtAt = new Date(purchaseDate);
 
-          return PurchaseDto.fromEntity(
-            await transactionalEntityManager.save(purchase),
-          );
-        },
-      );
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+        return PurchaseDto.fromEntity(
+          await transactionalEntityManager.save(purchase),
+        );
+      },
+    );
   }
 
   private calculatePurchaseTotalValue(products: Product[]): number {
