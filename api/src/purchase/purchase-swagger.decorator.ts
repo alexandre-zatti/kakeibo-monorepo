@@ -6,8 +6,10 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { ApiCommonResponses } from '../shared/decorators/swagger.decorator';
-import { PurchaseDto } from './dtos/purchase.dto';
-import { UpdatePurchaseDto } from './dtos/update-purchase.dto';
+import { PurchaseDto } from './dtos/purchase/purchase.dto';
+import { UpdatePurchaseDto } from './dtos/purchase/update-purchase.dto';
+import { UpdateProductDto } from './dtos/product/update-product.dto';
+import { ProductDto } from './dtos/product/product.dto';
 
 export function ApiCreatePurchaseDocs() {
   return applyDecorators(
@@ -39,11 +41,41 @@ export function ApiCreatePurchaseDocs() {
   );
 }
 
+export function ApiGetPurchaseDocs() {
+  return applyDecorators(
+    ApiOkResponse({
+      description: 'Purchase found successfully',
+      type: PurchaseDto,
+    }),
+    ApiCommonResponses(),
+  );
+}
+
+export function ApiGetPurchaseProductsDocs() {
+  return applyDecorators(
+    ApiOkResponse({
+      description: 'Products from purchase found successfully',
+      type: [ProductDto],
+    }),
+    ApiCommonResponses(),
+  );
+}
+
 export function ApiUpdatePurchaseDocs() {
   return applyDecorators(
     ApiOkResponse({
       description: 'Purchase updated successfully',
       type: UpdatePurchaseDto,
+    }),
+    ApiCommonResponses(),
+  );
+}
+
+export function ApiUpdatePurchaseProductDocs() {
+  return applyDecorators(
+    ApiOkResponse({
+      description: 'Product updated successfully',
+      type: UpdateProductDto,
     }),
     ApiCommonResponses(),
   );

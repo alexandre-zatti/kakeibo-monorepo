@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Param,
   Post,
   Put,
@@ -10,17 +11,38 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PurchaseService } from './services/purchase.service';
-import { CreatePurchaseDto } from './dtos/create-purchase.dto';
-import { PurchaseDto } from './dtos/purchase.dto';
+import { CreatePurchaseDto } from './dtos/purchase/create-purchase.dto';
+import { PurchaseDto } from './dtos/purchase/purchase.dto';
 import {
   ApiCreatePurchaseDocs,
+  ApiGetPurchaseDocs,
+  ApiGetPurchaseProductsDocs,
   ApiUpdatePurchaseDocs,
+  ApiUpdatePurchaseProductDocs,
 } from './purchase-swagger.decorator';
-import { UpdatePurchaseDto } from './dtos/update-purchase.dto';
+import { UpdatePurchaseDto } from './dtos/purchase/update-purchase.dto';
+import { UpdateProductDto } from './dtos/product/update-product.dto';
+import { ProductDto } from './dtos/product/product.dto';
 
 @Controller({ path: '/purchase', version: '1' })
 export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
+
+  @Get(':purchaseId')
+  @ApiGetPurchaseDocs()
+  async getPurchase(
+    @Param('purchaseId') purchaseId: number,
+  ): Promise<PurchaseDto> {
+    return this.purchaseService.getPurchaseById(purchaseId);
+  }
+
+  @Get(':purchaseId/products')
+  @ApiGetPurchaseProductsDocs()
+  async getPurchaseProducts(
+    @Param('purchaseId') purchaseId: number,
+  ): Promise<ProductDto[]> {
+    return this.purchaseService.getProductsByPurchaseId(purchaseId);
+  }
 
   @Post()
   @ApiCreatePurchaseDocs()
@@ -44,5 +66,19 @@ export class PurchaseController {
     @Body() body: UpdatePurchaseDto,
   ): Promise<UpdatePurchaseDto> {
     return await this.purchaseService.updatePurchase(purchaseId, body);
+  }
+
+  @Put(':purchaseId/product/:productId')
+  @ApiUpdatePurchaseProductDocs()
+  async updatePurchaseProduct(
+    @Param('purchaseId') purchaseId: number,
+    @Param('productId') productId: number,
+    @Body() body: UpdateProductDto,
+  ): Promise<UpdateProductDto> {
+    return await this.purchaseService.updatePurchaseProduct(
+      purchaseId,
+      productId,
+      body,
+    );
   }
 }
