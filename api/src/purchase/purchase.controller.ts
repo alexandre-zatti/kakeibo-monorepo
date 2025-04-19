@@ -1,4 +1,5 @@
 import {
+  applyDecorators,
   BadRequestException,
   Body,
   Controller,
@@ -6,64 +7,84 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Crud, CrudController } from '@dataui/crud';
+import { Purchase } from './entities/purchase.entity';
 import { PurchaseService } from './services/purchase.service';
-import { CreatePurchaseDto } from './dtos/create-purchase.dto';
-import { PurchaseDto } from './dtos/purchase.dto';
-import { ApiBody, ApiConsumes, ApiResponse } from '@nestjs/swagger';
+import { CreatePurchaseDto } from './dtos/purchase/create-purchase.dto';
+import { UpdatePurchaseDto } from './dtos/purchase/update-purchase.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { PurchaseDto } from './dtos/purchase/purchase.dto';
+import { ApiCommonResponses } from '../shared/decorators/swagger.decorator';
 
-@Controller({ path: '/purchase', version: '1' })
-export class PurchaseController {
-  constructor(private readonly purchaseService: PurchaseService) {}
+@Crud({
+  model: {
+    type: Purchase,
+  },
+  dto: {
+    create: CreatePurchaseDto,
+    update: UpdatePurchaseDto,
+  },
+  routes: {
+    only: ['getManyBase', 'getOneBase', 'updateOneBase', 'deleteOneBase'],
+  },
+})
+@ApiTags('purchase')
+@Controller({ path: 'purchase', version: '1' })
+export class PurchaseController implements CrudController<Purchase> {
+  constructor(public service: PurchaseService) {}
 
   @Post()
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Receipt file and date of purchase',
-    schema: {
-      type: 'object',
-      required: ['file', 'date'],
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-          description: 'The receipt file to upload',
-        },
-        date: {
-          type: 'string',
-          example: '2024-02-20',
-          description: 'Purchase date in ISO format (YYYY-MM-DD)',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Purchase successfully processed',
-    type: PurchaseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Receipt or Date is missing or invalid',
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Receipt is invalid',
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal Server Error',
-  })
+  @ApiCreatePurchaseDocs()
   @UseInterceptors(FileInterceptor('file'))
-  async createPurchase(
-    @UploadedFile() file: Express.Multer.File,
+  async createOneCustom(
     @Body() body: CreatePurchaseDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<PurchaseDto> {
     if (!file) {
       throw new BadRequestException('Receipt file is required');
     }
 
     const dto: CreatePurchaseDto = { ...body, file };
-    return await this.purchaseService.processAndSavePurchase(dto);
+    return this.service.processReceiptAndCreatePurchase(dto);
   }
+}
+
+function ApiCreatePurchaseDocs() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Create a single Purchase',
+    }),
+    ApiConsumes('multipart/form-data'),
+    ApiBody({
+      description: 'Receipt file and date of purchase',
+      schema: {
+        type: 'object',
+        required: ['file', 'date'],
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
+            description: 'The receipt file to upload',
+          },
+          date: {
+            type: 'string',
+            example: '2024-02-20',
+            description: 'Purchase date in ISO format (YYYY-MM-DD)',
+          },
+        },
+      },
+    }),
+    ApiCreatedResponse({
+      description: 'Purchase successfully created',
+      type: PurchaseDto,
+    }),
+    ApiCommonResponses(),
+  );
 }

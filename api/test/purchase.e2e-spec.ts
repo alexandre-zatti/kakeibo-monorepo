@@ -10,7 +10,7 @@ import { mockReceiptItemsArray } from './mocks/mockReceiptItemsArray';
 import { DocumentInteligenceModule } from '../src/document-inteligence/document-inteligence.module';
 import { Product } from '../src/purchase/entities/product.entity';
 import { PurchaseStatus } from '../src/purchase/enums/status.enum';
-import { PurchaseDto } from '../src/purchase/dtos/purchase.dto';
+import { PurchaseDto } from '../src/purchase/dtos/purchase/purchase.dto';
 
 describe('PurchaseController (e2e)', () => {
   let app: INestApplication<App>;
@@ -24,7 +24,6 @@ describe('PurchaseController (e2e)', () => {
           dropSchema: true,
           entities: [Purchase, Product],
           synchronize: true,
-          logging: true,
         }),
         TypeOrmModule.forFeature([Purchase, Product]),
         PurchaseModule,
@@ -47,7 +46,7 @@ describe('PurchaseController (e2e)', () => {
     await app.close();
   });
 
-  it('should create a new purchase (POST /purchase)', async () => {
+  it('should create a new purchase', async () => {
     const mockFile = Buffer.from('mock file content');
     const mockDate = '2024-02-20';
 
@@ -74,18 +73,5 @@ describe('PurchaseController (e2e)', () => {
     expect(responseBody).toHaveProperty('boughtAt');
     expect(new Date(responseBody.boughtAt)).toBeInstanceOf(Date);
     expect(new Date(responseBody.boughtAt).toString()).not.toBe('Invalid Date');
-
-    expect(responseBody).toHaveProperty('products');
-    expect(responseBody.products).toHaveLength(2);
-
-    responseBody.products.forEach((product) => {
-      expect(product).toHaveProperty('id');
-      expect(product).toHaveProperty('code');
-      expect(product).toHaveProperty('description');
-      expect(product).toHaveProperty('unitValue');
-      expect(product).toHaveProperty('unitIdentifier');
-      expect(product).toHaveProperty('quantity');
-      expect(product).toHaveProperty('totalValue');
-    });
   });
 });

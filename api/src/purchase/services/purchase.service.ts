@@ -1,25 +1,30 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ReceiptItemsArray } from '../../shared/types/documentReceipt';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Purchase } from '../entities/purchase.entity';
-import { DataSource } from 'typeorm';
 import { Product } from '../entities/product.entity';
-import { PurchaseDto } from '../dtos/purchase.dto';
-import { CreatePurchaseDto } from '../dtos/create-purchase.dto';
+import { PurchaseDto } from '../dtos/purchase/purchase.dto';
+import { CreatePurchaseDto } from '../dtos/purchase/create-purchase.dto';
 import { PurchaseStatus } from '../enums/status.enum';
 import { DocumentInteligenceService } from '../../document-inteligence/document-inteligence.service';
 import { ProductService } from './product.service';
+import { TypeOrmCrudService } from '@dataui/crud-typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
-export class PurchaseService {
+export class PurchaseService extends TypeOrmCrudService<Purchase> {
   constructor(
+    @InjectRepository(Purchase) purchaseRepository: Repository<Purchase>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly documentInteligenceService: DocumentInteligenceService,
     private readonly productService: ProductService,
-  ) {}
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super(purchaseRepository);
+  }
 
-  async processAndSavePurchase(
+  async processReceiptAndCreatePurchase(
     createPurchaseDto: CreatePurchaseDto,
   ): Promise<PurchaseDto> {
     try {
@@ -27,38 +32,37 @@ export class PurchaseService {
         await this.documentInteligenceService.extractItemsFromReceiptDocument(
           createPurchaseDto.file,
         );
-      return await this.savePurchase(createPurchaseDto.date, receiptItems);
+      return await this.savePurchaseWithProducts(
+        createPurchaseDto.date,
+        receiptItems,
+      );
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  private async savePurchase(
+  private async savePurchaseWithProducts(
     purchaseDate: string,
     receiptItems: ReceiptItemsArray,
   ): Promise<PurchaseDto> {
-    try {
-      return await this.dataSource.transaction(
-        async (transactionalEntityManager) => {
-          const purchase = new Purchase();
-          const products = this.productService.createProductsFromReceiptItems(
-            purchase,
-            receiptItems,
-          );
+    return await this.dataSource.transaction(
+      async (transactionalEntityManager) => {
+        const purchase = new Purchase();
+        const products = this.productService.createProductsFromReceiptItems(
+          purchase,
+          receiptItems,
+        );
 
-          purchase.products = products;
-          purchase.totalValue = this.calculatePurchaseTotalValue(products);
-          purchase.status = PurchaseStatus.PENDING_REVIEW;
-          purchase.boughtAt = new Date(purchaseDate);
+        purchase.products = products;
+        purchase.totalValue = this.calculatePurchaseTotalValue(products);
+        purchase.status = PurchaseStatus.PENDING_REVIEW;
+        purchase.boughtAt = new Date(purchaseDate);
 
-          return PurchaseDto.fromEntity(
-            await transactionalEntityManager.save(purchase),
-          );
-        },
-      );
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
+        return PurchaseDto.fromEntity(
+          await transactionalEntityManager.save(purchase),
+        );
+      },
+    );
   }
 
   private calculatePurchaseTotalValue(products: Product[]): number {

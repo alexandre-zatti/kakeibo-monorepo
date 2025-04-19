@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@azure-rest/ai-document-intelligence": "^1.0.0",
+    "@dataui/crud": "^5.3.4",
+    "@dataui/crud-typeorm": "^5.3.4",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.1",

@@ -17,6 +17,9 @@ export class Product extends AuditableEntity {
   @JoinColumn({ name: 'purchase_id' })
   purchase: Purchase;
 
+  @Column({ name: 'purchase_id' })
+  purchaseId: number;
+
   @Column({ type: 'varchar', length: 255, name: 'code', nullable: true })
   code?: string;
 

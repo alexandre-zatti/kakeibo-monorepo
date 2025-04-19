@@ -1,17 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Product } from '../entities/product.entity';
+import { Product } from '../../entities/product.entity';
+import { IsNumber, IsPositive, IsString } from 'class-validator';
 
 export class ProductDto {
   @ApiProperty({
     example: 1,
     description: 'The ID of the product',
   })
+  @IsNumber()
+  @IsPositive()
   id: number;
 
   @ApiProperty({
     example: 1,
     description: 'The ID of the purchase associated with this product',
   })
+  @IsNumber()
+  @IsPositive()
   purchase_id: number;
 
   @ApiProperty({
@@ -19,6 +24,7 @@ export class ProductDto {
     description: 'The unique code of the product',
     nullable: true,
   })
+  @IsString()
   code?: string;
 
   @ApiProperty({
@@ -26,6 +32,7 @@ export class ProductDto {
     description: 'The description of the product',
     nullable: true,
   })
+  @IsString()
   description?: string;
 
   @ApiProperty({
@@ -33,6 +40,8 @@ export class ProductDto {
     description: 'The unit value (price) of the product',
     nullable: true,
   })
+  @IsNumber()
+  @IsPositive()
   unitValue?: number;
 
   @ApiProperty({
@@ -40,6 +49,7 @@ export class ProductDto {
     description: 'The unit identifier (e.g., "UND", "KG")',
     nullable: true,
   })
+  @IsString()
   unitIdentifier?: string;
 
   @ApiProperty({
@@ -47,6 +57,8 @@ export class ProductDto {
     description: 'The quantity of the product',
     nullable: true,
   })
+  @IsNumber()
+  @IsPositive()
   quantity?: number;
 
   @ApiProperty({
@@ -54,6 +66,8 @@ export class ProductDto {
     description: 'The total value of the product (unitValue * quantity)',
     nullable: true,
   })
+  @IsNumber()
+  @IsPositive()
   totalValue?: number;
 
   static fromEntity(product: Product): ProductDto {
@@ -67,5 +81,20 @@ export class ProductDto {
       quantity: product.quantity,
       totalValue: product.totalValue,
     };
+  }
+
+  static fromEntityList(products: Product[]): ProductDto[] {
+    return products.map((product) => {
+      return {
+        id: product.id,
+        purchase_id: product.purchase.id,
+        code: product.code,
+        description: product.description,
+        unitValue: product.unitValue,
+        unitIdentifier: product.unitIdentifier,
+        quantity: product.quantity,
+        totalValue: product.totalValue,
+      };
+    });
   }
 }
