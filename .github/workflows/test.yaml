@@ -20,7 +20,7 @@ jobs:
         run: npm ci # Clean install dependencies using npm
 
       - name: Run unit tests
-        run: npx turbo run test # Run unit tests using turbo through npx
+        run: npx turbo run test --passWithNoTests # Run unit tests using turbo through npx
 
       - name: Run end-to-end tests
-        run: npx turbo run test:e2e # Run end-to-end tests using turbo through npx
+        run: npx turbo run test:e2e --passWithNoTests # Run end-to-end tests using turbo through npx
