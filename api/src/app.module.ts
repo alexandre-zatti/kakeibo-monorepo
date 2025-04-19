@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeOrmConfig from '../typeorm.config';
 import { DocumentInteligenceModule } from './document-inteligence/document-inteligence.module';
+import { ApiKeyAuthGuard } from './shared/guards/auth.guard';
 
 @Module({
   imports: [
@@ -12,5 +13,6 @@ import { DocumentInteligenceModule } from './document-inteligence/document-intel
     PurchaseModule,
     DocumentInteligenceModule,
   ],
+  providers: [ApiKeyAuthGuard],
 })
 export class AppModule {}

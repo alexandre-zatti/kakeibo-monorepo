@@ -1,25 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEnum, IsNumber, IsPositive } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { Purchase } from '../../entities/purchase.entity';
 import { PurchaseStatus } from '../../enums/status.enum';
 
 export class UpdatePurchaseDto {
-  @ApiProperty({
-    example: 1,
-    description: 'The ID of the purchase',
-  })
-  @IsNumber()
-  @IsPositive()
-  id: number;
-
   @ApiProperty({
     example: 1,
     description:
       'The status of the purchase (e.g., 1 for reviewed, 2 for pending revision)',
   })
   @IsEnum(PurchaseStatus)
-  status: number;
+  @IsOptional()
+  status?: number;
 
   @ApiProperty({
     example: 100.5,
@@ -27,7 +25,8 @@ export class UpdatePurchaseDto {
   })
   @IsNumber()
   @IsPositive()
-  totalValue: number;
+  @IsOptional()
+  totalValue?: number;
 
   @ApiProperty({
     example: '2024-02-20T14:30:00.000Z',
@@ -35,14 +34,6 @@ export class UpdatePurchaseDto {
   })
   @IsDate()
   @Type(() => Date)
-  boughtAt: Date;
-
-  static fromEntity(purchase: Purchase): UpdatePurchaseDto {
-    return {
-      id: purchase.id,
-      status: purchase.status,
-      totalValue: purchase.totalValue,
-      boughtAt: purchase.boughtAt,
-    };
-  }
+  @IsOptional()
+  boughtAt?: Date;
 }

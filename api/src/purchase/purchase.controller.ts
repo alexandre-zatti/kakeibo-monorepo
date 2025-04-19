@@ -1,84 +1,90 @@
 import {
+  applyDecorators,
   BadRequestException,
   Body,
   Controller,
-  Get,
-  Param,
   Post,
-  Put,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Crud, CrudController } from '@dataui/crud';
+import { Purchase } from './entities/purchase.entity';
 import { PurchaseService } from './services/purchase.service';
 import { CreatePurchaseDto } from './dtos/purchase/create-purchase.dto';
-import { PurchaseDto } from './dtos/purchase/purchase.dto';
-import {
-  ApiCreatePurchaseDocs,
-  ApiGetPurchaseDocs,
-  ApiGetPurchaseProductsDocs,
-  ApiUpdatePurchaseDocs,
-  ApiUpdatePurchaseProductDocs,
-} from './purchase-swagger.decorator';
 import { UpdatePurchaseDto } from './dtos/purchase/update-purchase.dto';
-import { UpdateProductDto } from './dtos/product/update-product.dto';
-import { ProductDto } from './dtos/product/product.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { PurchaseDto } from './dtos/purchase/purchase.dto';
+import { ApiCommonResponses } from '../shared/decorators/swagger.decorator';
 
-@Controller({ path: '/purchase', version: '1' })
-export class PurchaseController {
-  constructor(private readonly purchaseService: PurchaseService) {}
-
-  @Get(':purchaseId')
-  @ApiGetPurchaseDocs()
-  async getPurchase(
-    @Param('purchaseId') purchaseId: number,
-  ): Promise<PurchaseDto> {
-    return this.purchaseService.getPurchaseById(purchaseId);
-  }
-
-  @Get(':purchaseId/products')
-  @ApiGetPurchaseProductsDocs()
-  async getPurchaseProducts(
-    @Param('purchaseId') purchaseId: number,
-  ): Promise<ProductDto[]> {
-    return this.purchaseService.getProductsByPurchaseId(purchaseId);
-  }
+@Crud({
+  model: {
+    type: Purchase,
+  },
+  dto: {
+    create: CreatePurchaseDto,
+    update: UpdatePurchaseDto,
+  },
+  routes: {
+    only: ['getManyBase', 'getOneBase', 'updateOneBase', 'deleteOneBase'],
+  },
+})
+@ApiTags('purchase')
+@Controller({ path: 'purchase', version: '1' })
+export class PurchaseController implements CrudController<Purchase> {
+  constructor(public service: PurchaseService) {}
 
   @Post()
   @ApiCreatePurchaseDocs()
   @UseInterceptors(FileInterceptor('file'))
-  async createPurchase(
-    @UploadedFile() file: Express.Multer.File,
+  async createOneCustom(
     @Body() body: CreatePurchaseDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<PurchaseDto> {
     if (!file) {
       throw new BadRequestException('Receipt file is required');
     }
 
     const dto: CreatePurchaseDto = { ...body, file };
-    return await this.purchaseService.processReceiptAndCreatePurchase(dto);
+    return this.service.processReceiptAndCreatePurchase(dto);
   }
+}
 
-  @Put(':purchaseId')
-  @ApiUpdatePurchaseDocs()
-  async updatePurchase(
-    @Param('purchaseId') purchaseId: number,
-    @Body() body: UpdatePurchaseDto,
-  ): Promise<UpdatePurchaseDto> {
-    return await this.purchaseService.updatePurchase(purchaseId, body);
-  }
-
-  @Put(':purchaseId/product/:productId')
-  @ApiUpdatePurchaseProductDocs()
-  async updatePurchaseProduct(
-    @Param('purchaseId') purchaseId: number,
-    @Param('productId') productId: number,
-    @Body() body: UpdateProductDto,
-  ): Promise<UpdateProductDto> {
-    return await this.purchaseService.updatePurchaseProduct(
-      purchaseId,
-      productId,
-      body,
-    );
-  }
+function ApiCreatePurchaseDocs() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Create a single Purchase',
+    }),
+    ApiConsumes('multipart/form-data'),
+    ApiBody({
+      description: 'Receipt file and date of purchase',
+      schema: {
+        type: 'object',
+        required: ['file', 'date'],
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
+            description: 'The receipt file to upload',
+          },
+          date: {
+            type: 'string',
+            example: '2024-02-20',
+            description: 'Purchase date in ISO format (YYYY-MM-DD)',
+          },
+        },
+      },
+    }),
+    ApiCreatedResponse({
+      description: 'Purchase successfully created',
+      type: PurchaseDto,
+    }),
+    ApiCommonResponses(),
+  );
 }

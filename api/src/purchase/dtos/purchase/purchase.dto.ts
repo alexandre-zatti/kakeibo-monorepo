@@ -47,4 +47,15 @@ export class PurchaseDto {
       boughtAt: purchase.boughtAt,
     };
   }
+
+  static fromEntityList(purchases: Purchase[]): PurchaseDto[] {
+    return purchases.map((purchase) => {
+      return {
+        id: purchase.id,
+        status: purchase.status,
+        totalValue: purchase.totalValue,
+        boughtAt: purchase.boughtAt,
+      };
+    });
+  }
 }

@@ -2,10 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { Purchase } from '../entities/purchase.entity';
 import { ReceiptItemsArray } from '../../shared/types/documentReceipt';
 import { Product } from '../entities/product.entity';
+import { TypeOrmCrudService } from '@dataui/crud-typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
-export class ProductService {
-  constructor() {}
+export class ProductService extends TypeOrmCrudService<Product> {
+  constructor(
+    @InjectRepository(Product) productRepository: Repository<Product>,
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super(productRepository);
+  }
 
   createProductsFromReceiptItems(
     purchase: Purchase,

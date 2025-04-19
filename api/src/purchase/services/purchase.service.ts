@@ -1,50 +1,27 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ReceiptItemsArray } from '../../shared/types/documentReceipt';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Purchase } from '../entities/purchase.entity';
-import { DataSource } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { PurchaseDto } from '../dtos/purchase/purchase.dto';
 import { CreatePurchaseDto } from '../dtos/purchase/create-purchase.dto';
 import { PurchaseStatus } from '../enums/status.enum';
 import { DocumentInteligenceService } from '../../document-inteligence/document-inteligence.service';
 import { ProductService } from './product.service';
-import { UpdatePurchaseDto } from '../dtos/purchase/update-purchase.dto';
-import { UpdateProductDto } from '../dtos/product/update-product.dto';
-import { ProductDto } from '../dtos/product/product.dto';
+import { TypeOrmCrudService } from '@dataui/crud-typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
-export class PurchaseService {
+export class PurchaseService extends TypeOrmCrudService<Purchase> {
   constructor(
+    @InjectRepository(Purchase) purchaseRepository: Repository<Purchase>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly documentInteligenceService: DocumentInteligenceService,
     private readonly productService: ProductService,
-  ) {}
-
-  async getPurchaseById(purchaseId: number): Promise<PurchaseDto> {
-    const purchase = await this.dataSource.getRepository(Purchase).findOne({
-      where: { id: purchaseId },
-    });
-
-    if (!purchase) {
-      throw new NotFoundException(`Purchase with ID ${purchaseId} not found`);
-    }
-
-    return PurchaseDto.fromEntity(purchase);
-  }
-
-  async getProductsByPurchaseId(purchaseId: number): Promise<ProductDto[]> {
-    const products = await this.dataSource.getRepository(Product).find({
-      where: { purchase: { id: purchaseId } },
-      loadRelationIds: true,
-    });
-
-    return ProductDto.fromEntityList(products);
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super(purchaseRepository);
   }
 
   async processReceiptAndCreatePurchase(
@@ -62,77 +39,6 @@ export class PurchaseService {
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
-  }
-
-  async updatePurchase(
-    purchaseId: number,
-    updatePurchaseDto: UpdatePurchaseDto,
-  ): Promise<UpdatePurchaseDto> {
-    const purchaseRepository = this.dataSource.getRepository(Purchase);
-    const existingPurchase = await purchaseRepository.findOne({
-      where: { id: purchaseId },
-    });
-
-    if (!existingPurchase) {
-      throw new NotFoundException(`Purchase with ID ${purchaseId} not found`);
-    }
-
-    const updatedPurchase = purchaseRepository.merge(
-      existingPurchase,
-      updatePurchaseDto,
-    );
-
-    return purchaseRepository.save(updatedPurchase);
-  }
-
-  async updatePurchaseProduct(
-    purchaseId: number,
-    productId: number,
-    updateProductDto: UpdateProductDto,
-  ): Promise<UpdateProductDto> {
-    return await this.dataSource.transaction(
-      async (transactionalEntityManager) => {
-        const purchaseRepository =
-          transactionalEntityManager.getRepository(Purchase);
-        const productRepository =
-          transactionalEntityManager.getRepository(Product);
-
-        const existingProduct = await productRepository.findOne({
-          where: { id: productId },
-        });
-
-        if (!existingProduct) {
-          throw new NotFoundException(`Product with ID ${productId} not found`);
-        }
-
-        const updatedProduct = UpdateProductDto.fromEntity(
-          await productRepository.save(
-            productRepository.merge(existingProduct, updateProductDto),
-          ),
-        );
-
-        const existingPurchase = await purchaseRepository.findOne({
-          where: { id: purchaseId },
-          relations: ['products'],
-        });
-
-        if (!existingPurchase) {
-          throw new NotFoundException(
-            `Purchase with ID ${purchaseId} not found`,
-          );
-        }
-
-        await purchaseRepository.save(
-          purchaseRepository.merge(existingPurchase, {
-            totalValue: this.calculatePurchaseTotalValue(
-              existingPurchase.products,
-            ),
-          }),
-        );
-
-        return updatedProduct;
-      },
-    );
   }
 
   private async savePurchaseWithProducts(
