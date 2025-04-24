@@ -11,20 +11,20 @@ WORKDIR /app
 
 # Copy only the necessary package files
 COPY package.json package-lock.json ./
-COPY api/package.json ./api/
+COPY groceries-api/package.json ./groceries-api/
 COPY packages/ ./packages/
 
 # Install dependencies
 RUN npm install --force
 
-# Copy only the api source code
-COPY api/src/ ./api/src/
-COPY api/tsconfig.json ./api/
-COPY api/nest-cli.json ./api/
-COPY api/typeorm.config.ts ./api/
+# Copy only the groceries-groceries-api source code
+COPY groceries-api/src/ ./groceries-api/src/
+COPY groceries-api/tsconfig.json ./groceries-api/
+COPY groceries-api/nest-cli.json ./groceries-api/
+COPY groceries-api/typeorm.config.ts ./groceries-api/
 
 # Build the application
-WORKDIR /app/api
+WORKDIR /app/groceries-api
 RUN npm run build
 
 EXPOSE 3000
