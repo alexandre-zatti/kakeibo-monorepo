@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - API_KEY=${API_KEY}
+      - DI_ENDPOINT=${DI_ENDPOINT}
+      - DI_KEY=${DI_KEY}

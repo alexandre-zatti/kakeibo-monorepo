@@ -8,7 +8,7 @@ import { ApiKeyAuthGuard } from './shared/guards/auth.guard';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../../.env' }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
     PurchaseModule,
     DocumentInteligenceModule,
