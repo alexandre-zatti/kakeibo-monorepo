@@ -10,3 +10,12 @@ services:
       - API_KEY=${API_KEY}
       - DI_ENDPOINT=${DI_ENDPOINT}
       - DI_KEY=${DI_KEY}
+    volumes:
+      - sqlite_database:/app/db
+
+volumes:
+  sqlite_database:
+    driver_opts:
+      type: none
+      device: ${DATABASE_VOLUME_PATH}
+      o: bind
