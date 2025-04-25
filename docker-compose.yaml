@@ -11,7 +11,7 @@ services:
       - DI_ENDPOINT=${DI_ENDPOINT}
       - DI_KEY=${DI_KEY}
     volumes:
-      - sqlite_database:/app/db
+      - sqlite_database:/app/db/database.sqlite
 
 volumes:
   sqlite_database:
