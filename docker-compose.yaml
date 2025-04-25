@@ -15,7 +15,3 @@ services:
 
 volumes:
   sqlite_database:
-    driver_opts:
-      type: none
-      device: ${DATABASE_VOLUME_PATH}
-      o: bind
