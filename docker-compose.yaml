@@ -10,7 +10,7 @@ services:
       - DI_ENDPOINT=${DI_ENDPOINT}
       - DI_KEY=${DI_KEY}
     volumes:
-      - sqlite_database:/app/db/database.sqlite
+      - sqlite_database:/app/db
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/api/health" ]
       interval: 30s
