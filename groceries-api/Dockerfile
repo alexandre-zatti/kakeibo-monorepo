@@ -1,11 +1,12 @@
 FROM node:20-alpine
 
-# Install build dependencies for sqlite3
+# Install build dependencies for sqlite3 and healthcheck
 RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    git
+    git \
+    wget
 
 WORKDIR /app
 
