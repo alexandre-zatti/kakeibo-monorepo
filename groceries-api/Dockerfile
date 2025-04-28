@@ -10,9 +10,6 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# Create database directory
-RUN mkdir -p /app/db
-
 # Copy only the necessary package files
 COPY package.json package-lock.json ./
 COPY groceries-api/package.json ./groceries-api/
