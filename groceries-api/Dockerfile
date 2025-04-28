@@ -20,6 +20,7 @@ RUN npm install --force
 
 # Copy only the groceries-groceries-api source code
 COPY groceries-api/src/ ./groceries-api/src/
+COPY groceries-api/db/ ./groceries-api/db/
 COPY groceries-api/tsconfig.json ./groceries-api/
 COPY groceries-api/nest-cli.json ./groceries-api/
 COPY groceries-api/typeorm.config.ts ./groceries-api/
