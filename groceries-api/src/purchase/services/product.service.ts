@@ -11,7 +11,6 @@ export class ProductService extends TypeOrmCrudService<Product> {
   constructor(
     @InjectRepository(Product) productRepository: Repository<Product>,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super(productRepository);
   }
 

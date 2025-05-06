@@ -10,7 +10,7 @@ import { Reflector } from '@nestjs/core';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '../.env' }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.local' }),
     TypeOrmModule.forRoot(typeOrmConfig.options),
     PurchaseModule,
     DocumentInteligenceModule,
