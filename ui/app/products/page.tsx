@@ -1,3 +1,10 @@
+import { PageHeader } from '@/components/page-header';
+
 export default function ProductsPage() {
-  return <div>Products</div>;
+  return (
+    <>
+      <PageHeader title={'Products'} />
+      <div>Products</div>
+    </>
+  );
 }
