@@ -20,7 +20,6 @@ export class PurchaseService extends TypeOrmCrudService<Purchase> {
     private readonly documentInteligenceService: DocumentInteligenceService,
     private readonly productService: ProductService,
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     super(purchaseRepository);
   }
 

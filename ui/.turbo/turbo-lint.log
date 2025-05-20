@@ -1,4 +1,0 @@
-
-> ui@0.1.0 lint
-> eslint --config ../packages/config/eslint/next.config.js --fix
-
