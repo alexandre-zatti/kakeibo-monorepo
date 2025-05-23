@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Product } from '../../entities/product.entity';
-import { IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsInstance, IsNumber, IsPositive, IsString } from 'class-validator';
+import { PurchaseDto } from '../purchase/purchase.dto';
 
 export class ProductDto {
   @ApiProperty({
@@ -12,12 +12,11 @@ export class ProductDto {
   id: number;
 
   @ApiProperty({
-    example: 1,
+    example: PurchaseDto,
     description: 'The ID of the purchase associated with this product',
   })
-  @IsNumber()
-  @IsPositive()
-  purchase_id: number;
+  @IsInstance(PurchaseDto)
+  purchase: PurchaseDto;
 
   @ApiProperty({
     example: 'PROD123',
@@ -69,32 +68,4 @@ export class ProductDto {
   @IsNumber()
   @IsPositive()
   totalValue?: number;
-
-  static fromEntity(product: Product): ProductDto {
-    return {
-      id: product.id,
-      purchase_id: product.purchase.id,
-      code: product.code,
-      description: product.description,
-      unitValue: product.unitValue,
-      unitIdentifier: product.unitIdentifier,
-      quantity: product.quantity,
-      totalValue: product.totalValue,
-    };
-  }
-
-  static fromEntityList(products: Product[]): ProductDto[] {
-    return products.map((product) => {
-      return {
-        id: product.id,
-        purchase_id: product.purchase.id,
-        code: product.code,
-        description: product.description,
-        unitValue: product.unitValue,
-        unitIdentifier: product.unitIdentifier,
-        quantity: product.quantity,
-        totalValue: product.totalValue,
-      };
-    });
-  }
 }

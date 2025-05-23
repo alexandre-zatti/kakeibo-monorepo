@@ -13,7 +13,9 @@ export class Product extends AuditableEntity {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @ManyToOne(() => Purchase, (purchase) => purchase.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Purchase, (purchase) => purchase.products, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'purchase_id' })
   purchase: Purchase;
 
