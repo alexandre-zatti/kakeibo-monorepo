@@ -7,13 +7,18 @@ import { ProductService } from './services/product.service';
 import { DocumentInteligenceModule } from '../document-inteligence/document-inteligence.module';
 import { Product } from './entities/product.entity';
 import { PurchaseProductsController } from './purchase-product.controller';
+import { ProductController } from './product.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Purchase, Product]),
     DocumentInteligenceModule,
   ],
-  controllers: [PurchaseController, PurchaseProductsController],
+  controllers: [
+    PurchaseController,
+    PurchaseProductsController,
+    ProductController,
+  ],
   providers: [PurchaseService, ProductService],
 })
 export class PurchaseModule {}

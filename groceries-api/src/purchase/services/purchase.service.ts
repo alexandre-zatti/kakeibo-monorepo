@@ -12,7 +12,7 @@ import { TypeOrmCrudService } from '@dataui/crud-typeorm';
 import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
-export class PurchaseService extends TypeOrmCrudService<Purchase> {
+export class PurchaseService extends TypeOrmCrudService<PurchaseDto> {
   constructor(
     @InjectRepository(Purchase) purchaseRepository: Repository<Purchase>,
     @InjectDataSource()
@@ -65,9 +65,6 @@ export class PurchaseService extends TypeOrmCrudService<Purchase> {
   }
 
   private calculatePurchaseTotalValue(products: Product[]): number {
-    return products.reduce(
-      (prev, curr) => prev + (curr.totalValue ? curr.totalValue : 0),
-      0,
-    );
+    return products.reduce((prev, curr) => prev + (curr.totalValue ?? 0), 0);
   }
 }

@@ -5,9 +5,10 @@ import { Product } from '../entities/product.entity';
 import { TypeOrmCrudService } from '@dataui/crud-typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ProductDto } from '../dtos/product/product.dto';
 
 @Injectable()
-export class ProductService extends TypeOrmCrudService<Product> {
+export class ProductService extends TypeOrmCrudService<ProductDto> {
   constructor(
     @InjectRepository(Product) productRepository: Repository<Product>,
   ) {

@@ -20,7 +20,10 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { PurchaseDto } from './dtos/purchase/purchase.dto';
+import {
+  PaginatedPurchaseDto,
+  PurchaseDto,
+} from './dtos/purchase/purchase.dto';
 import { ApiCommonResponses } from '../shared/decorators/swagger.decorator';
 
 @Crud({
@@ -34,10 +37,14 @@ import { ApiCommonResponses } from '../shared/decorators/swagger.decorator';
   routes: {
     only: ['getManyBase', 'getOneBase', 'updateOneBase', 'deleteOneBase'],
   },
+  serialize: {
+    get: PurchaseDto,
+    getMany: PaginatedPurchaseDto,
+  },
 })
 @ApiTags('purchase')
 @Controller({ path: 'purchase', version: '1' })
-export class PurchaseController implements CrudController<Purchase> {
+export class PurchaseController implements CrudController<PurchaseDto> {
   constructor(public service: PurchaseService) {}
 
   @Post()

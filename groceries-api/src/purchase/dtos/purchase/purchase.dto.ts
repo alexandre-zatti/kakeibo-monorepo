@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Purchase } from '../../entities/purchase.entity';
 import { IsDate, IsEnum, IsNumber, IsPositive } from 'class-validator';
 import { PurchaseStatus } from '../../enums/status.enum';
-import { Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 
 export class PurchaseDto {
   @ApiProperty({
@@ -11,6 +11,7 @@ export class PurchaseDto {
   })
   @IsPositive()
   @IsNumber()
+  @Expose()
   id: number;
 
   @ApiProperty({
@@ -21,6 +22,7 @@ export class PurchaseDto {
   @IsPositive()
   @IsNumber()
   @IsEnum(PurchaseStatus)
+  @Expose()
   status: number;
 
   @ApiProperty({
@@ -29,6 +31,7 @@ export class PurchaseDto {
   })
   @IsPositive()
   @IsNumber()
+  @Expose()
   totalValue: number;
 
   @ApiProperty({
@@ -37,6 +40,7 @@ export class PurchaseDto {
   })
   @IsDate()
   @Type(() => Date)
+  @Expose()
   boughtAt: Date;
 
   static fromEntity(purchase: Purchase): PurchaseDto {
@@ -47,15 +51,30 @@ export class PurchaseDto {
       boughtAt: purchase.boughtAt,
     };
   }
+}
 
-  static fromEntityList(purchases: Purchase[]): PurchaseDto[] {
-    return purchases.map((purchase) => {
-      return {
-        id: purchase.id,
-        status: purchase.status,
-        totalValue: purchase.totalValue,
-        boughtAt: purchase.boughtAt,
-      };
-    });
-  }
+export class PaginatedPurchaseDto {
+  @ApiProperty({ type: [PurchaseDto], description: 'Array of purchases' })
+  @Expose()
+  @Type(() => PurchaseDto)
+  data: PurchaseDto[];
+
+  @ApiProperty({
+    example: 1,
+    description: 'Total count of items on current page',
+  })
+  @Expose()
+  count: number;
+
+  @ApiProperty({ example: 934, description: 'Total count of all items' })
+  @Expose()
+  total: number;
+
+  @ApiProperty({ example: 1, description: 'Current page number' })
+  @Expose()
+  page: number;
+
+  @ApiProperty({ example: 934, description: 'Total number of pages' })
+  @Expose()
+  pageCount: number;
 }
