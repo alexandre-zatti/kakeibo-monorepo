@@ -1,20 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 
-import { PurchaseDto } from '../purchase/purchase.dto';
-
-export class ProductDto {
+export class PurchaseProductDto {
   @ApiProperty({ example: 1, description: 'The ID of the product' })
   @Expose()
   id: number;
-
-  @ApiProperty({
-    type: () => PurchaseDto,
-    description: 'The purchase associated with this product',
-  })
-  @Expose()
-  @Type(() => PurchaseDto)
-  purchase: PurchaseDto;
 
   @Exclude()
   purchaseId: number;
@@ -76,11 +66,11 @@ export class ProductDto {
   updatedAt: Date;
 }
 
-export class PaginatedProductDto {
-  @ApiProperty({ type: [ProductDto], description: 'Array of products' })
+export class PaginatedPurchaseProductDto {
+  @ApiProperty({ type: [PurchaseProductDto], description: 'Array of products' })
   @Expose()
-  @Type(() => ProductDto)
-  data: ProductDto[];
+  @Type(() => PurchaseProductDto)
+  data: PurchaseProductDto[];
 
   @ApiProperty({
     example: 1,
