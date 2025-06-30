@@ -4,12 +4,12 @@ import { Purchase, PurchaseCreate, PurchaseUpdate } from './purchase';
 export const Product = z.object({
   id: z.number().int(),
   purchase: Purchase,
-  code: z.string(),
-  description: z.string(),
-  unitValue: z.number(),
-  unitIdentifier: z.string(),
-  quantity: z.number(),
-  totalValue: z.number(),
+  code: z.string().nullable(),
+  description: z.string().nullable(),
+  unitValue: z.number().nullable(),
+  unitIdentifier: z.string().nullable(),
+  quantity: z.number().nullable(),
+  totalValue: z.number().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

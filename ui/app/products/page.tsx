@@ -1,8 +1,9 @@
 import { PageHeader } from '@/components/page-header';
-import { ColumnDef } from '@tanstack/react-table';
 import { Product, ProductType } from '@/types/product';
-import { DataTable } from '@/components/data-table';
 import { PaginatedResponseSchema } from '@/types/paginated';
+import ProductsTable from '@/app/products/table';
+import Search from '@/app/products/search';
+import { cn } from '@/lib/utils';
 
 interface ProductsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -11,52 +12,42 @@ interface ProductsPageProps {
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
-  const params = await searchParams;
-  const page = Number(params.page) || 1;
+  const resolvedSearchParams = await searchParams;
+
+  const page = Number(resolvedSearchParams.page) || 1;
   const limit = 20;
+  const search =
+    typeof resolvedSearchParams.search === 'string'
+      ? resolvedSearchParams.search
+      : undefined;
 
-  const columns: ColumnDef<ProductType>[] = [
-    {
-      accessorKey: 'description',
-      header: 'Description',
-    },
-    {
-      accessorKey: 'quantity',
-      header: 'Quantity',
-    },
-    {
-      accessorKey: 'unitValue',
-      header: 'Value',
-    },
-    {
-      accessorKey: 'unitIdentifier',
-      header: 'Unit',
-    },
-    {
-      accessorKey: 'totalValue',
-      header: 'Total',
-    },
-    {
-      accessorKey: 'purchase.boughtAt',
-      header: 'Bought At',
-    },
-  ];
-
-  async function fetchProducts(): Promise<{
+  async function fetchProducts(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{
     data: ProductType[];
     count: number;
     total: number;
     page: number;
     pageCount: number;
   }> {
-    const res = await fetch(
-      `${process.env.API_GROCERIES_URL}/product?page=${page}&limit=${limit}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.API_TOKEN}`,
-        },
+    const url = new URL(`${process.env.API_GROCERIES_URL}/product`);
+    url.searchParams.set('page', String(page));
+    url.searchParams.set('limit', String(limit));
+    url.searchParams.set('sort', 'purchase.boughtAt,DESC');
+
+    if (search && search.trim() !== '') {
+      const filterString = `description||$cont||${search}`;
+      url.searchParams.set('filter', filterString);
+    }
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${process.env.API_TOKEN}`,
       },
-    );
+    });
+
     if (!res.ok) {
       throw new Error(
         `Failed to fetch products: ${res.status} ${res.statusText}`,
@@ -74,13 +65,22 @@ export default async function ProductsPage({
     return result.data;
   }
 
-  const { data, total, page: currentPage, pageCount } = await fetchProducts();
+  const {
+    data,
+    total,
+    page: currentPage,
+    pageCount,
+  } = await fetchProducts(page, limit, search);
 
   return (
     <>
       <PageHeader title={'Products'} />
-      <DataTable
-        columns={columns}
+
+      <div className={cn('mb-4')}>
+        <Search />
+      </div>
+
+      <ProductsTable
         data={data}
         page={currentPage}
         pageCount={pageCount}
