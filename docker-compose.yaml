@@ -28,7 +28,7 @@ services:
     environment:
       - API_GROCERIES_URL=http://api:3000/api/v1
       - API_TOKEN=${API_TOKEN}
-      - NEXT_PUBLIC_SOME_VALUE=your-value
+      - NEXT_PUBLIC_BASE_PATH=/app
     depends_on:
       api:
         condition: service_healthy
