@@ -14,19 +14,24 @@ FROM base AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
+
 COPY . .
 
-RUN npm run build --workspace=ui
+WORKDIR /app/ui
+
+RUN npm run build
 
 FROM base AS runner
 WORKDIR /app
 
-COPY --from=builder --chown=nextjs:nodejs /app/ui/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/ui/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/ui/.next/static ./.next/static
+ENV NODE_ENV=production
+
+COPY --from=builder /app/ui/.next/standalone/. ./
+
+COPY --from=builder /app/ui/public ./public
+COPY --from=builder /app/ui/.next/static ./.next/static
 
 EXPOSE 3001
-
 ENV PORT=3001
 
-CMD ["node", "server.js"]
+CMD ["node", "ui/server.js"]
