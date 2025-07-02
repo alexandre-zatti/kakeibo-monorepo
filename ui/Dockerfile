@@ -11,12 +11,13 @@ COPY packages/ ./packages/
 RUN npm install
 
 FROM base AS builder
+ARG NEXT_PUBLIC_BASE_PATH
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
-
 COPY . .
 
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
 WORKDIR /app/ui
 
 RUN npm run build
