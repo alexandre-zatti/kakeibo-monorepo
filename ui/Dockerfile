@@ -1,16 +1,20 @@
 FROM node:18-alpine AS base
+RUN apk add --no-cache libc6-compat
 
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package*.json ./
-COPY ui/package*.json ./ui/
+COPY package.json package-lock.json* ./
+
+COPY groceries-api/package.json ./groceries-api/
+COPY ui/package.json ./ui/
+COPY packages/config/package.json ./packages/config/
 
 RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -36,4 +40,4 @@ EXPOSE 3001
 ENV PORT 3001
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "ui/server.js"]
+CMD ["node", "server.js"]
