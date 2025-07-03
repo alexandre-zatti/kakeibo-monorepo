@@ -1,38 +1,39 @@
-FROM node:20-alpine AS base
-WORKDIR /app
+FROM node:18-alpine AS base
 
 FROM base AS deps
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-COPY ui/package.json ./ui/
-COPY packages/ ./packages/
+COPY package*.json ./
+COPY ui/package*.json ./ui/
 
-RUN npm install
+RUN npm ci
 
 FROM base AS builder
-ARG NEXT_PUBLIC_BASE_PATH
 WORKDIR /app
-
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
 WORKDIR /app/ui
-
 RUN npm run build
 
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
+ENV NODE_ENV production
 
-COPY --from=builder /app/ui/.next/standalone/. ./
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/ui/public ./public
-COPY --from=builder /app/ui/.next/static ./.next/static
+COPY --from=builder /app/ui/.next/standalone ./
+COPY --from=builder /app/ui/.next/static ./ui/.next/static
+COPY --from=builder /app/ui/public ./ui/public
+
+USER nextjs
 
 EXPOSE 3001
-ENV PORT=3001
+
+ENV PORT 3001
+ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "ui/server.js"]

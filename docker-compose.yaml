@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: groceries-api/Dockerfile
+      dockerfile: /groceries-api/Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -23,8 +23,6 @@ services:
     build:
       context: .
       dockerfile: ui/Dockerfile
-      args:
-        - NEXT_PUBLIC_BASE_PATH=/app
     ports:
       - "3001:3001"
     environment:
