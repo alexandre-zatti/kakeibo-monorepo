@@ -2,7 +2,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: /groceries-api/Dockerfile
+      dockerfile: groceries-api/Dockerfile
     ports:
       - "3000:3000"
     environment:
